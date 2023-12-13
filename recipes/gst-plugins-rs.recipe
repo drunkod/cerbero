@@ -41,7 +41,6 @@ class Recipe(recipe.Recipe):
         'rav1e',
         'regex',
         'reqwest',
-        'raptorq',
         'png',
         'rtp',
         'textahead',
@@ -91,7 +90,7 @@ class Recipe(recipe.Recipe):
 
         plugin_files = {
             'core': ['fallbackswitch', 'livesync', 'togglerecord', 'rstracers'],
-            'net': ['aws', 'hlssink3', 'ndi', 'rsonvif', 'raptorq', 'rsrtp',
+            'net': ['aws', 'hlssink3', 'ndi', 'rsonvif', 'rsrtp',
                     'reqwest', 'webrtchttp', 'rswebrtc'],
             'effects': ['rsaudiofx', 'rsvideofx'],
             'codecs': ['cdg', 'claxon', 'dav1d', 'rsclosedcaption', 'ffv1',
