@@ -1196,7 +1196,7 @@ class Cargo(Build, ModifyEnvBase):
         # crashes.
         # TODO: We don't ship split debuginfo (dSYM, PDB) in the packages yet:
         # https://gitlab.freedesktop.org/gstreamer/cerbero/-/issues/381
-        if self.config.target_platform in (Platform.WINDOWS, Platform.DARWIN):
+        if self.config.target_platform == Platform.DARWIN or self.using_msvc():
             self.rustc_debuginfo = 'split'
         else:
             self.rustc_debuginfo = 'strip'
@@ -1247,6 +1247,17 @@ class Cargo(Build, ModifyEnvBase):
         with open(os.path.join(dot_cargo, 'config.toml'), 'a') as f:
             f.write(s)
 
+    def get_llvm_tool(self, tool: str) -> Path:
+        '''
+        Gets one of the LLVM tools matching the current Rust toolchain.
+        '''
+        root_dir = subprocess.run([self.config.cargo_home + '/bin/rustc',
+                                   '--print', 'sysroot'], capture_text=True, text=True, check=True).stdout.strip()
+        tools = glob.glob(f'**/{tool}', root_dir=root_dir)
+        if len(tools) == 0:
+            raise FatalError('Rust {tool} tool not found, try re-running bootstrap')
+        return (Path(root_dir) / tools[0]).resolve()
+
     def get_cargo_toml_version(self):
         tomllib = self.config.find_toml_module()
         if not tomllib:
@@ -1275,21 +1286,20 @@ class Cargo(Build, ModifyEnvBase):
         if self.rustc_debuginfo == 'strip':
             s = '\n[profile.release]\nstrip = "debuginfo"\n'
             self.append_config_toml(s)
+        else:
+            s = '\n[profile.release]\nsplit-debuginfo = "packed"\n'
+            self.append_config_toml(s)
 
         if self.config.target_platform == Platform.ANDROID:
-            linker = self.env['LD']
+            # Use the compiler's forwarding
+            # See https://android.googlesource.com/platform/ndk/+/master/docs/BuildSystemMaintainers.md#linkers
+            linker = self.get_env('RUSTC_LINKER')
             link_args = []
-            args = iter(shlex.split(self.env['LDFLAGS']))
+            args = iter(shlex.split(self.get_env('LDFLAGS', '')))
             # We need to extract necessary linker flags from LDFLAGS which is
             # passed to the compiler
             for arg in args:
-                if arg.startswith('-L'):
-                    link_args.append(arg)
-                elif arg == '-gcc-toolchain':
-                    arg = next(args)
-                    for l in glob.glob(f'{arg}/lib/gcc/*/*/libgcc.a'):
-                        d = os.path.dirname(l)
-                        link_args.append(f'-L{d}')
+                link_args += ['-C', f"link-args={arg}"]
             s = f'[target.{self.target_triple}]\n' \
                 f'linker = "{linker}"\n' \
                 f'rustflags = {link_args!r}\n'
