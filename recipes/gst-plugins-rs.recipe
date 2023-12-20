@@ -97,13 +97,13 @@ class Recipe(recipe.Recipe):
 
         plugin_files = {
             'core': ['fallbackswitch', 'livesync', 'togglerecord', 'rstracers'],
-            'net': ['aws', 'hlssink3', 'ndi', 'rsonvif', 'rsrtp',
-                    'reqwest', 'webrtchttp', 'rswebrtc'],
-            'effects': ['rsaudiofx', 'rsvideofx'],
-            'codecs': ['cdg', 'claxon', 'dav1d', 'rsclosedcaption', 'ffv1',
-                       'fmp4', 'mp4', 'gif', 'hsv', 'lewton', 'rav1e', 'json',
-                       'rspng', 'regex', 'textwrap', 'textahead'],
-            'playback': ['uriplaylistbin'],
+        #    'net': ['aws', 'hlssink3', 'ndi', 'rsonvif', 'rsrtp',
+        #            'reqwest', 'webrtchttp', 'rswebrtc'],
+        #    'effects': ['rsaudiofx', 'rsvideofx'],
+        #    'codecs': ['cdg', 'claxon', 'dav1d', 'rsclosedcaption', 'ffv1',
+        #               'fmp4', 'mp4', 'gif', 'hsv', 'lewton', 'rav1e', 'json',
+        #               'rspng', 'regex', 'textwrap', 'textahead'],
+        #    'playback': ['uriplaylistbin'],
         }
         # https://gitlab.freedesktop.org/gstreamer/gst-plugins-rs/-/issues/326
         if self.library_type != LibraryType.STATIC:
